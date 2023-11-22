@@ -64,12 +64,16 @@ namespace ChatP2P
                 switch (tcpMessage[0])
                 {
                     case '0':
-                        {
+                        {               
                             client.Name = tcpMessage.Substring(1);
                             _chatUsers.UserList.Add(client);
                             if (count > 0)
                             {
                                 client.SendMessage("3" + Crypto.ComputeInitMsg());
+                                this.Invoke(new MethodInvoker(() =>
+                                {
+                                    ChatTextBox.Text = $"{DateTime.Now.ToLongTimeString()} : Init msg sent: {Crypto.ComputeInitMsg()} with random: {Crypto.random}, private key {Crypto.PrivateSelf} \r\n" + ChatTextBox.Text;
+                                }));
                                 count--;
                             }
                             break;
@@ -81,14 +85,25 @@ namespace ChatP2P
                             if (count > 0)
                             {
                                 client.SendMessage("3" + Crypto.ComputeInitMsg());
+                                this.Invoke(new MethodInvoker(() =>
+                                {
+                                    ChatTextBox.Text = $"{DateTime.Now.ToLongTimeString()} : Init msg sent: {Crypto.ComputeInitMsg()} with random: {Crypto.random}, private key {Crypto.PrivateSelf} \r\n" + ChatTextBox.Text;
+                                }));
+                                
                                 count--;                             
                             }
                             if (Crypto.SessionKey > 0) break;
-                            Crypto.ComputeSessionkey(BigInteger.Parse(tcpMessage.Substring(1)));
+                            this.Invoke(new MethodInvoker(() =>
+                            {
+                                ChatTextBox.Text = $"{DateTime.Now.ToLongTimeString()} : received init msg {tcpMessage.Substring(1)} \r\n" + ChatTextBox.Text;
+                            }));
+                            Crypto.ComputeSessionkey(Int32.Parse(tcpMessage.Substring(1)));
                             this.Invoke(new MethodInvoker(() =>
                             {
                                 ChatTextBox.Text = $"{DateTime.Now.ToLongTimeString()} : Session key: {Crypto.SessionKey} \r\n" + ChatTextBox.Text;
                             }));
+                            
+
                             break;
                         }
                     case '1':
@@ -96,7 +111,7 @@ namespace ChatP2P
                         {
                             ChatTextBox.Text = $"{DateTime.Now.ToLongTimeString()} : {client.Name} [{client.IP}] left chat :(\r\n" + ChatTextBox.Text;
                         }));
-
+                        count++;
                         _chatUsers.UserList.Remove(client);
                         return;
 

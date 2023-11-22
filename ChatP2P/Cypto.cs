@@ -14,14 +14,14 @@ namespace ChatP2P
 {
     public class Crypto
     {
-        static public BigInteger PrimeNum;
-        static public BigInteger q;
-        static public BigInteger Gen;
-        static public BigInteger PrivateSelf;
-        private static uint random = 0;
-        static public BigInteger PublicSelf;
-        static public BigInteger PublicRemote;
-        static public BigInteger SessionKey;
+        static public int PrimeNum;
+        static public int q;
+        static public int Gen;
+        static public int PrivateSelf;
+        static public uint random = 0;
+        static public int PublicSelf;
+        static public int PublicRemote;
+        static public int SessionKey;
 
         private const int Keysize = 256;
         private const int DerivationIterations = 1000;
@@ -106,12 +106,15 @@ namespace ChatP2P
 
         public static BigInteger ComputeInitMsg()
         {
-            return BigInteger.ModPow(Gen, random, PrimeNum);
+            File.AppendAllText("./log.txt",$"init msg for {PrivateSelf}: {BigInteger.ModPow(Gen, random, PrimeNum)} \n");
+            return BigInteger.ModPow(Gen, random, PrimeNum);     
         }
 
-        public static void ComputeSessionkey(BigInteger RemoteMsg)
+        public static void ComputeSessionkey(int RemoteMsg)
         {
-            SessionKey = BigInteger.ModPow(BigInteger.ModPow(RemoteMsg, PrivateSelf, PrimeNum) * BigInteger.ModPow(PublicRemote, PrivateSelf, PrimeNum), 1, PrimeNum);
+            //SessionKey = (int)(BigInteger.ModPow(RemoteMsg, PrivateSelf, PrimeNum) * BigInteger.ModPow(PublicRemote, PrivateSelf, PrimeNum)) % PrimeNum;
+            SessionKey = (((int)Math.Pow(RemoteMsg, PrivateSelf) % PrimeNum) * ((int)Math.Pow(PublicRemote,(int)random) % PrimeNum)) % PrimeNum;
+            //SessionKey = BigInteger.ModPow(BigInteger.ModPow(RemoteMsg, PrivateSelf, PrimeNum) * BigInteger.ModPow(PublicRemote, PrivateSelf, PrimeNum), 1, PrimeNum);   
         }
 
         static bool IsPrime(int n)
@@ -197,11 +200,11 @@ namespace ChatP2P
             string text = File.ReadAllText(@"./data"+order+".txt");
             var jsonObject = JObject.Parse(text);
 
-            PrimeNum = BigInteger.Parse((string)jsonObject["PrimeNum"]);
-            q = (Int64)jsonObject["q"];
-            Gen = (Int64)jsonObject["Gen"];
-            PrivateSelf = BigInteger.Parse((string)jsonObject["PrivateSelf"]);
-            PublicRemote = BigInteger.Parse((string)jsonObject["PublicRemote"]); ;
+            PrimeNum = Int32.Parse((string)jsonObject["PrimeNum"]);
+            q = (Int32)jsonObject["q"];
+            Gen = (Int32)jsonObject["Gen"];
+            PrivateSelf = Int32.Parse((string)jsonObject["PrivateSelf"]);
+            PublicRemote = Int32.Parse((string)jsonObject["PublicRemote"]); ;
 /*
             PrimeNum = 1;
             while (!IsProbablePrime(PrimeNum, 10))
@@ -217,7 +220,7 @@ namespace ChatP2P
             var randomize = new Random();
             random = (uint)randomize.Next(0, 10);
             //random = (uint)(number + (uint)Int32.MaxValue);           
-            PublicSelf = BigInteger.ModPow(PrivateSelf, Gen, PrimeNum);
+            PublicSelf = (int)BigInteger.ModPow(PrivateSelf, Gen, PrimeNum);
             
 
         }
