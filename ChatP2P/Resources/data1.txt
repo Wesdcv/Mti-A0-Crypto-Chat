@@ -1,0 +1,7 @@
+{
+  "PrimeNum": 11,
+  "PrivateSelf": 3,
+  "Gen": 2,
+  "q": 5,
+  "PublicRemote": 4
+}
